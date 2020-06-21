@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'jacoco'
+apply plugin: 'application'
+
+
+mainClassName = 'io.plotnik.freewriting.FreewritingFrame'
+group = 'io.plotnik'
+version = '0.1'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation     'junit:junit:4.13'
+}
+
+task readme(type: Exec) {
+    commandLine 'asciidoctor', 'README.adoc'    
+}
