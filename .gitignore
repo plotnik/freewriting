@@ -3,6 +3,8 @@ build/
 gradle/
 .gradle/
 .vscode/
+.settings/
+nbproject/
 
 .classpath
 .project
