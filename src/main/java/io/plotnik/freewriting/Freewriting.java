@@ -20,34 +20,34 @@ import java.util.stream.Collectors;
  */
 public class Freewriting {
 
-    /** 
+    /**
      * Каталог, в котором находятся фрирайты.
      */
     String home;
 
-    /** 
+    /**
      * Сегодняшняя дата.
      */
     LocalDate today;
 
-    /** 
-     * Hазвания месяцев с падежами. 
+    /**
+     * Hазвания месяцев с падежами.
      */
     List<String> monthNames = Arrays.asList(new String[]{
         "января", "февраля", "марта", "апреля", "мая", "июня",
         "июля", "августа", "сентября", "октября", "ноября", "декабря"});
 
-    /** 
+    /**
      * Список дат и имен имеющихся фрирайтов.
      */
     List<FwDate> fdates;
 
-    /** 
-     * Первая дата базы. 
+    /**
+     * Первая дата базы.
      */
     LocalDate dbStart;
 
-    /** 
+    /**
      * Первая дата сезона
      */
     LocalDate start;
@@ -57,7 +57,7 @@ public class Freewriting {
     DateTimeFormatter weekDayFormat = DateTimeFormatter.ofPattern("EE", new Locale("ru"));
 
     /**
-     * Мы загрузим все имеющиеся файлы `.md` 
+     * Мы загрузим все имеющиеся файлы `.md`
      * из текущего каталога и подкаталогов сезонов.
      * Затем определим, какой реально дате соответствует каждый файл,
      * какова начальная дата базы и есть ли пропуски.
@@ -68,7 +68,7 @@ public class Freewriting {
             today = LocalDate.now();
             dbStart = LocalDate.parse("2016-09-13", df);
 
-            /* Загрузим все имеющиеся файлы `.md` из текущего каталога 
+            /* Загрузим все имеющиеся файлы `.md` из текущего каталога
                и подкаталогов сезонов
              */
             File hf = new File(home);
@@ -76,7 +76,9 @@ public class Freewriting {
             scanFolder(hf, today.getYear(), today.getMonthValue());
             File[] hfiles = hf.listFiles();
             for (File f : hfiles) {
-                scanFolder(f, extractSeasonYear(f.getName()), -1);
+                if (f.isDirectory()) {
+                    scanFolder(f, extractSeasonYear(f.getName()), -1);
+                }
             }
             fdates = fdates.stream().sorted(Comparator.comparing(FwDate::getDate))
                     .collect(Collectors.toList());
@@ -116,7 +118,7 @@ public class Freewriting {
      * @param year  Поскольку в имени файла фрирайта не указан год,
      *              то нам нужно передавать его как параметр.
      * @param curMonth  Текущий месяц для корневой папки.
-     *                  Его нужно указывать, поскольку для корневой папки 
+     *                  Его нужно указывать, поскольку для корневой папки
      *                  часть файлов может принадлежать предыдущему году.
      *                  Для остальных папок -1.
      */
@@ -126,6 +128,9 @@ public class Freewriting {
 
         File[] dirFiles = dir.listFiles();
         for (File f : dirFiles) {
+            if (f.isDirectory()) {
+                continue;
+            }
             if (!f.getName().endsWith(".md")) {
                 throw new FwException("I EXPECT THE FOLDER TO CONTAIN ONLY '.md' FILES");
             }
@@ -155,8 +160,7 @@ public class Freewriting {
                 throw new FwException("MONTH NAME MISSPELLED IN FILE: " + fileName);
             }
 
-            String datestr = handleDecember(year, month, curMonth) + "-"
-                    + (month + 1) + "-" + day;
+            String datestr = String.format("%4d-%02d-%02d", handleDecember(year, month, curMonth), (month + 1), day);
             LocalDate date = LocalDate.parse(datestr, df);
             fdates.add(new FwDate(date, f, (curMonth != -1)));
 
