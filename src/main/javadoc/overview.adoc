@@ -1,0 +1,42 @@
+= Markup for javadoc
+:icons: font
+:toc: right
+
+
+The intention was to use some markup in javadoc comments.
+
+link:https://github.com/asciidoctor/asciidoclet[Asciidoclet] was once a good option,
+but currently it
+link:https://github.com/asciidoctor/asciidoclet/issues/76[does not support Java 11].
+
+Main class in flow::
+link:io/plotnik/freewriting/FreewritingFrame.html[io.plotnik.freewriting.FreewritingFrame]
+
+== Asciidoc
+
+Попытка сгенерировать `overview.html` непосредственно из данного файла
+возвращает множество ошибок типа
+
+----
+bad use of '>'
+----
+
+== Markdown
+
+Markdown-плагин в jEdit может генерировать html для маркдауна в клипборд,
+но не может окружить его тэгами `<body>`, а для javadoc это важно.
+
+== RST
+
+TIP: А вот это реально работает!
+
+== Links
+
+Gradle `javadoc` task:
+https://docs.gradle.org/current/dsl/org.gradle.api.tasks.javadoc.Javadoc.html
+
+StackOverflow about Javadoc:
+https://stackoverflow.com/questions/tagged/javadoc
+
+Javadoc overview files:
+https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javadoc.html#overviewcomment

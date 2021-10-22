@@ -17,5 +17,10 @@ dependencies {
 }
 
 task readme(type: Exec) {
-    commandLine 'asciidoctor', 'README.adoc'    
+    commandLine 'asciidoctor', 'README.adoc'
+}
+
+javadoc {
+    source = sourceSets.main.allJava
+    options.overview = "src/main/javadoc/overview.html"
 }
