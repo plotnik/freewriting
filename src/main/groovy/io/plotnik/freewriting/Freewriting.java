@@ -92,7 +92,7 @@ public class Freewriting {
                 final LocalDate d = date;
                 Optional<FwDate> f = fdates.stream()
                         .filter((FwDate it) -> it.getDate().isEqual(d)).findFirst();
-                if (f.isEmpty()) {
+                if (!f.isPresent()) {
                     out.println("Date not found: " + date);
                     break;
                 }
@@ -207,4 +207,9 @@ public class Freewriting {
         // декабрь для корневой папки
         return curMonth == 11 ? year : year - 1;
     }
+
+    public List<FwDate> getFdates() {
+        return fdates;
+    }
+
 }

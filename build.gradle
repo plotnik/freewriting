@@ -1,19 +1,20 @@
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'jacoco'
+apply plugin: 'groovy'
 apply plugin: 'application'
 
 
-mainClassName = 'io.plotnik.freewriting.FreewritingFrame'
+mainClassName = 'io.plotnik.freewriting.Main'
 group = 'io.plotnik'
-version = '0.1'
+
+sourceCompatibility = '1.8'
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    testImplementation     'junit:junit:4.13'
+    implementation 'info.picocli:picocli:4.6.3'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.10'    
+    testImplementation 'junit:junit:4.13'
 }
 
 task readme(type: Exec) {
