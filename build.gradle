@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     implementation 'info.picocli:picocli:4.6.3'
-    implementation 'org.codehaus.groovy:groovy-all:3.0.10'    
+    implementation 'org.codehaus.groovy:groovy-all:3.0.10'
     testImplementation 'junit:junit:4.13'
 }
 
@@ -24,4 +24,16 @@ task readme(type: Exec) {
 javadoc {
     source = sourceSets.main.allJava
     options.overview = "src/main/javadoc/overview.html"
+}
+
+task fatjar(type: Jar) {
+    manifest {
+        attributes "Main-Class": mainClassName
+    }
+    baseName = "fw-all"
+    from {
+        configurations.compileClasspath.filter{ it.exists() }
+            .collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }
