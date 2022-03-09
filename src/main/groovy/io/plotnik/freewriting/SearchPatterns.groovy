@@ -31,6 +31,7 @@ public class SearchPatterns {
     List<FwDate> fdates;
 
     SimpleDateFormat linkFormat = new SimpleDateFormat('yyyy-MM-dd')
+    SimpleDateFormat ymdFormat = new SimpleDateFormat('dd.MM.yyyy')
 
 
     SearchPatterns(String home, String serverURL, String asciidoctor) {
@@ -182,6 +183,71 @@ public class SearchPatterns {
         return "- link:${serverURL}/${dstr}[${tstamp}]"
     }
 
+  /**
+   * Собрать в результирующий файл фрирайты, содержащие указанные интервалы дат.
+   * @param outName    Имя результирующего файла
+   * @param title      Заголовок страницы
+   * @param intervals  Список интервалов дат 
+   */
+  void extractIntervals(String outName, 
+                    String title,
+                    List<List<String>> intervals) {
+    println '.'*80
+    Writer f = new File(home, outName).newWriter("UTF-8")
+    f.println "= " + title
+    f.println ":toc:"
+    f.println ""
+    
+    String fsep = System.getProperty('file.separator')
+    String season1 = null;
+    for (iv in intervals) {
+    	Date dt1 = dt(iv[0])
+    	Date dt2 = dt(iv[1])
+
+        Date d = dt1;
+        while (d.before(dt2)) {
+
+    		def fdate = fdates.find { it.date==d }
+    		String fname = fdate.path
+    		String text = new File(fname).text
+
+			int k = fname.lastIndexOf(fsep) + 1            
+            String tstamp = fname[k..-4]
+			int k2 = fname.lastIndexOf(fsep, k-2) + 1
+			String season2 = fname[k2..k-2]
+			if (season1!=season2) {
+			  f.println "== " + season2.replace('-', ' ')
+			  season1 = season2
+			}
+			f.println "=== " + tstamp
+			f.println ""
+			f.println "[%hardbreaks]"
+			f.println text
+			f.println ""
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(d);
+            calendar.add(Calendar.DATE, 1);
+            d = calendar.getTime();
+    	}
+    }
+    f.close()
+    println "== `$outName` created"
+    
+    try {
+        def proc = "$asciidoctor $outName".execute([], new File(home))
+        proc.waitForProcessOutput(System.out, System.err)
+        println "asciidoctor $outName | exit code: " + proc.exitValue()
+
+    } catch (Exception e) {
+        println "[WARN] " + e.getMessage();
+    }  
+  }
+  
+  Date dt(String tstamp) {
+    return ymdFormat.parse(tstamp)
+  }
+  
   /**
    * Указанная строка содержит хотя бы один из списка указанных шаблонов.
    */
