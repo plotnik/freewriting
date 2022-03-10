@@ -2,6 +2,8 @@ package io.plotnik.freewriting;
 
 import groovy.json.*
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
 public class SearchPatterns {
 
@@ -30,8 +32,8 @@ public class SearchPatterns {
 
     List<FwDate> fdates;
 
-    SimpleDateFormat linkFormat = new SimpleDateFormat('yyyy-MM-dd')
-    SimpleDateFormat ymdFormat = new SimpleDateFormat('dd.MM.yyyy')
+    SimpleDateFormat linkFormat = new SimpleDateFormat('yyyy-MM-dd');
+    DateTimeFormatter ymdFormat = DateTimeFormatter.ofPattern('dd.MM.yyyy');
 
 
     SearchPatterns(String home, String serverURL, String asciidoctor) {
@@ -100,9 +102,11 @@ public class SearchPatterns {
         }
         if (p.s != null) {
             extractPages(wwwFolder + p.fname + '.adoc', p.title, p.s)
+            createOutputIndex(wwwFolder + 'index.adoc')
         } else
         if (p.i != null) {
             extractIntervals(wwwFolder + p.fname + '.adoc', p.title, p.i)
+            createOutputIndex(wwwFolder + 'index.adoc')
         } else {
             println "[ERROR] `$patternName` cannot search either pages or intervals"
         }
@@ -165,15 +169,7 @@ public class SearchPatterns {
         }
         f.close()
         println "`$outName` created, $foundCount findings"
-
-        try {
-            def proc = "$asciidoctor $outName".execute([], new File(home))
-            proc.waitForProcessOutput(System.out, System.err)
-            println "asciidoctor $outName | exit code: " + proc.exitValue()
-
-        } catch (Exception e) {
-            println "[WARN] " + e.getMessage();
-        }
+        runAsciidoctor(outName)
     }
 
     String linkByDate(date, tstamp) {
@@ -187,9 +183,9 @@ public class SearchPatterns {
    * Собрать в результирующий файл фрирайты, содержащие указанные интервалы дат.
    * @param outName    Имя результирующего файла
    * @param title      Заголовок страницы
-   * @param intervals  Список интервалов дат 
+   * @param intervals  Список интервалов дат
    */
-  void extractIntervals(String outName, 
+  void extractIntervals(String outName,
                     String title,
                     List<List<String>> intervals) {
     println '.'*80
@@ -197,21 +193,20 @@ public class SearchPatterns {
     f.println "= " + title
     f.println ":toc:"
     f.println ""
-    
+
     String fsep = System.getProperty('file.separator')
     String season1 = null;
     for (iv in intervals) {
-    	Date dt1 = dt(iv[0])
-    	Date dt2 = dt(iv[1])
+    	LocalDate dt1 = LocalDate.parse(iv[0], ymdFormat)
+    	LocalDate dt2 = LocalDate.parse(iv[1], ymdFormat)
 
-        Date d = dt1;
-        while (d.before(dt2)) {
+        for (LocalDate d = dt1; d.isBefore(dt2) || d.isEqual(dt2); d = d.plusDays(1)) {
 
     		def fdate = fdates.find { it.date==d }
     		String fname = fdate.path
     		String text = new File(fname).text
 
-			int k = fname.lastIndexOf(fsep) + 1            
+			int k = fname.lastIndexOf(fsep) + 1
             String tstamp = fname[k..-4]
 			int k2 = fname.lastIndexOf(fsep, k-2) + 1
 			String season2 = fname[k2..k-2]
@@ -219,21 +214,15 @@ public class SearchPatterns {
 			  f.println "== " + season2.replace('-', ' ')
 			  season1 = season2
 			}
-			f.println "=== " + tstamp
-			f.println ""
-			f.println "[%hardbreaks]"
-			f.println text
-			f.println ""
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(d);
-            calendar.add(Calendar.DATE, 1);
-            d = calendar.getTime();
+			f.println linkByDate(fdate.date, tstamp)
     	}
     }
     f.close()
     println "== `$outName` created"
-    
+    runAsciidoctor(outName)
+  }
+
+  void runAsciidoctor(String outName) {
     try {
         def proc = "$asciidoctor $outName".execute([], new File(home))
         proc.waitForProcessOutput(System.out, System.err)
@@ -241,13 +230,9 @@ public class SearchPatterns {
 
     } catch (Exception e) {
         println "[WARN] " + e.getMessage();
-    }  
+    }
   }
-  
-  Date dt(String tstamp) {
-    return ymdFormat.parse(tstamp)
-  }
-  
+
   /**
    * Указанная строка содержит хотя бы один из списка указанных шаблонов.
    */
@@ -261,4 +246,19 @@ public class SearchPatterns {
     return result
   }
 
+    void createOutputIndex(String outName) {
+        List keys = getSortedNames()
+        Writer f = new File(outName).newWriter("UTF-8")
+        f.println "= Freewriting"
+        f.println ""
+          for (key in keys) {
+                def p = searchPatterns[key]
+                //assert p.fname.endsWith('.adoc')
+                //String fname = p.fname.substring(0, p.fname.length()-5)
+                f.println "- link:${p.fname}.html[${p.title}]"
+          }
+        f.close()
+        println "== `$outName` created"
+        runAsciidoctor(outName)
+    }
 }
