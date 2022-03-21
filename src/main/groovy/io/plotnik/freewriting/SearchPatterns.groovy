@@ -127,6 +127,11 @@ public class SearchPatterns {
         f.println ":toc:"
         f.println ""
 
+        /* Показать шаблоны в паттерне
+         */
+        f.println patterns.join(", ") + "\n\n";
+
+
         /* Пройти по всем файлам фрирайтов
          */
         String fsep = System.getProperty('file.separator')
