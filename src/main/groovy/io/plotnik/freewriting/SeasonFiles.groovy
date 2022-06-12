@@ -1,5 +1,7 @@
 package io.plotnik.freewriting;
 
+import java.time.Month;
+
 public class SeasonFiles {
 
     String home;
@@ -67,9 +69,10 @@ public class SeasonFiles {
     for (freewrite in fdates) { // проходим по записям в базе фрирайтов
       if (freewrite.isRoot() &&
           freewrite.date.getYear() == year &&
-          freewrite.date.getMonth() == monthNum) {
+          freewrite.date.getMonth().getValue()-1 == monthNum) {
+        //println "r:${freewrite.isRoot()}, m:${freewrite.date.getMonth()}, y:${freewrite.date.getYear()}"       
         //String fname = nameFormat(freewrite.date) + '.md'
-        File f1 = new File(freewrite.path)
+        File f1 = freewrite.path
         String fname = f1.name
         println "- " + fname
         boolean fileMoved = f1.renameTo(new File(targetFolder, fname))
