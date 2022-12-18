@@ -33,7 +33,7 @@ public class Freewriting {
     /**
      * Hазвания месяцев с падежами.
      */
-    List<String> monthNames = Arrays.asList(new String[]{
+    static List<String> monthNames = Arrays.asList(new String[]{
         "января", "февраля", "марта", "апреля", "мая", "июня",
         "июля", "августа", "сентября", "октября", "ноября", "декабря"});
 
@@ -42,6 +42,10 @@ public class Freewriting {
      */
     List<FwDate> fdates;
 
+    // Новые даты в Java
+    // https://docs.oracle.com/javase/tutorial/datetime/TOC.html
+    // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/package-summary.html
+    
     /**
      * Первая дата базы.
      */
@@ -53,8 +57,8 @@ public class Freewriting {
     LocalDate start;
 
     Calendar cal = Calendar.getInstance();
-    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    DateTimeFormatter weekDayFormat = DateTimeFormatter.ofPattern("EE", new Locale("ru"));
+    static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    static DateTimeFormatter weekDayFormat = DateTimeFormatter.ofPattern("EE", new Locale("ru"));
 
     /**
      * Мы загрузим все имеющиеся файлы `.md`
@@ -73,7 +77,7 @@ public class Freewriting {
              */
             File hf = new File(home);
             fdates = new ArrayList<>();
-            scanFolder(hf, today.getYear(), today.getMonthValue());
+            scanFolder(hf, today.getYear(), today.getMonthValue() - 1);
             File[] hfiles = hf.listFiles();
             for (File f : hfiles) {
                 if (f.isDirectory()) {
@@ -160,7 +164,10 @@ public class Freewriting {
                 throw new FwException("MONTH NAME MISSPELLED IN FILE: " + fileName);
             }
 
-            String datestr = String.format("%4d-%02d-%02d", handleDecember(year, month, curMonth), (month + 1), day);
+            int yearD = handleDecember(year, month, curMonth);
+            //out.println("-- year: " + year + ", month: " + month + ", curMonth: " + curMonth + ", yearD: " + yearD);
+
+            String datestr = String.format("%4d-%02d-%02d", yearD, (month + 1), day);
             LocalDate date = LocalDate.parse(datestr, df);
             fdates.add(new FwDate(date, f, (curMonth != -1)));
 
@@ -183,7 +190,7 @@ public class Freewriting {
     /**
      * Вернуть дату в формате фрирайта, например `13 мая сб`
      */
-    String nameFormat(LocalDate date) {
+    static String nameFormat(LocalDate date) {
         String weekDay = weekDayFormat.format(date).toLowerCase();
         return date.getDayOfMonth() + " "
                 + monthNames.get(date.getMonthValue() - 1) + " " + weekDay;
@@ -197,7 +204,7 @@ public class Freewriting {
      * @param curMonth  Текущий месяц
      * @return          Год для файла фрирайта
      */
-    int handleDecember(int year, int month, int curMonth) {
+    static int handleDecember(int year, int month, int curMonth) {
         if (month != 11) { // все месяцы, кроме декабря
             return year;
         }
