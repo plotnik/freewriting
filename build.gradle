@@ -31,6 +31,7 @@ task fatjar(type: Jar) {
         attributes "Main-Class": mainClassName
     }
     baseName = "fw-all"
+    duplicatesStrategy = "include"
     from {
         configurations.compileClasspath.filter{ it.exists() }
             .collect { it.isDirectory() ? it : zipTree(it) }
