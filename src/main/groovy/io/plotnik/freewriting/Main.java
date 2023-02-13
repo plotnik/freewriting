@@ -37,7 +37,11 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-p", "--pattern"}, description = "Name of pattern file to extract")
     String patternFile;
 
-    @Option(names = {"-a", "--asciidoctor"}, defaultValue = "asciidoctor",
+    @Option(names = {"-g", "--gui"}, 
+            description = "Open GUI window")
+    boolean optionGui;
+
+    @Option(names = {"-a", "--asciidoctor"}, 
             description = "Asciidoctor command")
     String asciidoctor;
 
@@ -84,7 +88,8 @@ public class Main implements Callable<Integer> {
             if (seasonToMove != null) {
                 moveSeasonButtonClicked(seasonToMove);
 
-            } else {
+            } else 
+            if (optionGui) {
                 frame = new FreewritingFrame(searchPatterns.getSortedNames(), this);
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);

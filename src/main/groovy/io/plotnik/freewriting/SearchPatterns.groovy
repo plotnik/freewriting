@@ -228,6 +228,9 @@ public class SearchPatterns {
   }
 
   void runAsciidoctor(String outName) {
+    if (asciidoctor == null) {
+        return;
+    }
     try {
         def proc = "$asciidoctor $outName".execute([], new File(home))
         proc.waitForProcessOutput(System.out, System.err)
